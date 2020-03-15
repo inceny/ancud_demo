@@ -9,11 +9,11 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    Backend backend;
 
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("backend", &backend);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    Backend backend(&engine);
+    engine.rootContext()->setContextProperty("backend", &backend);
     if (engine.rootObjects().isEmpty())
         return -1;
 

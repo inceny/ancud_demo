@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 COMPONENTS Core Quick REQUIRED)
 file(GLOB_RECURSE source_list "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.h")
-message("files: " ${source_list})
+
 add_executable(${PROJECT_NAME} "main.cpp" "qml.qrc" ${source_list})
 
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick)
