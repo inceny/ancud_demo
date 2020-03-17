@@ -24,15 +24,16 @@ public slots:
     void replyFinished(QNetworkReply* reply);
     bool isDirWritable(QString dir);
     void addLogMsg(QString msg, bool error = false);
+    void clearSaveFolder();
 
 private:
     QNetworkAccessManager* manager;
     QQmlApplicationEngine* engine;
     QObject* text_area_log;
-    QObject* msg_box;
     QUrl base_url;
     QString file_saving_location;
     QFile file_base_page;
+    QStringList list_nested_links;
 };
 
 #endif // BACKEND_H

@@ -33,6 +33,7 @@ Window {
         anchors.rightMargin: 30
         anchors.verticalCenterOffset: 0
         anchors.verticalCenter: textField.verticalCenter
+        onClicked: log.text = ""
     }
 
     Connections {
@@ -55,6 +56,7 @@ Window {
         anchors.top: textField.bottom
         anchors.topMargin: 30
         textFormat: TextEdit.RichText
+        onLinkActivated: Qt.openUrlExternally(log.hoveredLink)
     }
 
     MessageDialog{
