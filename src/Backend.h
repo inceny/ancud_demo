@@ -25,6 +25,8 @@ public slots:
     bool isDirWritable(QString dir);
     void addLogMsg(QString msg, bool error = false);
     void clearSaveFolder();
+    void onDownloadProgressChanged(qint64 bytesReceived, qint64 bytesTotal);
+    void onReadyRead();
 
 private:
     QNetworkAccessManager* manager;
@@ -34,6 +36,7 @@ private:
     QString file_saving_location;
     QFile file_base_page;
     QStringList list_nested_links;
+    QNetworkReply* reply_base_page;
 };
 
 #endif // BACKEND_H
