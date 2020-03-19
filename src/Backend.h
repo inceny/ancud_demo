@@ -11,11 +11,14 @@
 #include <QDir>
 #include <QCoreApplication>
 
+#define FILE_EXTENSION ""
+
+class LinkModel;
 class Backend : public QObject
 {
     Q_OBJECT
 public:
-    explicit Backend(QQmlApplicationEngine* engine, QObject *parent = nullptr);
+    explicit Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *parent = nullptr);
 
 signals:
     void errorMsgBox(QString error_str);
@@ -37,6 +40,7 @@ private:
     QFile file_base_page;
     QStringList list_nested_links;
     QNetworkReply* reply_base_page;
+    LinkModel* model;
 };
 
 #endif // BACKEND_H

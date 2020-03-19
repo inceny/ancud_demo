@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <src/Backend.h>
+#include <src/linkmodel.h>
 
 int main(int argc, char *argv[])
 {
@@ -9,10 +10,12 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    LinkModel model;
 
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("myModel", &model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    Backend backend(&engine);
+    Backend backend(&engine, &model);
     engine.rootContext()->setContextProperty("backend", &backend);
     if (engine.rootObjects().isEmpty())
         return -1;

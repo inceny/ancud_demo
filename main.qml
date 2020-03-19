@@ -17,11 +17,11 @@ Window {
         text: "https://yandex.ru"
         font.pointSize: 12
         anchors.right: button.left
-        anchors.rightMargin: 30
+        anchors.rightMargin: 20
         anchors.left: parent.left
-        anchors.leftMargin: 30
+        anchors.leftMargin: 20
         anchors.top: parent.top
-        anchors.topMargin: 30
+        anchors.topMargin: 20
         placeholderText: qsTr("http(s)://")
     }
 
@@ -30,7 +30,7 @@ Window {
         y: 30
         text: qsTr("Скачать")
         anchors.right: parent.right
-        anchors.rightMargin: 30
+        anchors.rightMargin: 20
         anchors.verticalCenterOffset: 0
         anchors.verticalCenter: textField.verticalCenter
         onClicked: log.text = ""
@@ -44,34 +44,51 @@ Window {
     TextArea {
         objectName: "log"
         id: log
+        height: 243
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 20
         readOnly: true
         font.family: "Courier"
         font.pointSize: 12
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 30
-        anchors.right: parent.right
-        anchors.rightMargin: 30
-        anchors.left: parent.left
-        anchors.leftMargin: 30
-        anchors.top: textField.bottom
-        anchors.topMargin: 30
         textFormat: TextEdit.RichText
         onLinkActivated: Qt.openUrlExternally(log.hoveredLink)
     }
 
-    MessageDialog{
-        id: msgDialog
-        objectName: "msgDialog"
-        title: "Error"
-        text: "Text"
-        onAccepted: {
-            Qt.quit()
+    ListView {
+        id: listProgress
+        anchors.bottom: log.top
+        anchors.bottomMargin: 20
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: textField.bottom
+        anchors.topMargin: 20
+        model: myModel
+        delegate: Row {
+            spacing: 5
+            Text {
+                text: page
+                width: 300
+                elide: Text.ElideLeft
+//                wrapMode: Text.WrapAnywhere
+                font.pointSize: 12
+//                textFormat: Text.RichText
+                onLinkActivated: Qt.openUrlExternally(link)
+            }
+            ProgressBar{
+                value: percentage
+                minimumValue: 0
+                maximumValue: 100
+            }
+            Text {
+                text: percentage + " %"
+                font.pointSize: 12
+            }
         }
     }
 }
-
-/*##^##
-Designer {
-    D{i:4;anchors_height:178;anchors_width:292;anchors_x:115;anchors_y:185}
-}
-##^##*/
