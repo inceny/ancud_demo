@@ -8,8 +8,12 @@ Backend::Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *paren
     this->model = model;
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(replyFinished(QNetworkReply*)));
-
     text_area_log = engine->rootObjects().at(0)->findChild<QObject*>("log");
+
+    reply_parser = new ReplyParser(this);
+    thread_reply_parser = new QThread();
+    reply_parser->moveToThread(thread_reply_parser);
+    thread_reply_parser->start();
 
 
     // создание папки для сохранения
@@ -74,7 +78,12 @@ void Backend::onReadyRead()
     else
     {
         QFile file_nested_page;
-        file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.indexOf(reply->url().toString())) + FILE_EXTENSION);
+        int file_name_index = list_nested_links.indexOf(reply);
+        if(file_name_index == -1)
+        {
+            return;
+        }
+        file_nested_page.setFileName(file_saving_location + "/" + QString::number(file_name_index) + FILE_EXTENSION);
         if(!file_nested_page.isOpen())
         {
             file_nested_page.open(QIODevice::Append);
@@ -150,11 +159,11 @@ void Backend::replyFinished(QNetworkReply *reply)
                 {
                     extracted_href = base_url.resolved(extracted_href).toString();
                 }
-                list_nested_links.append(extracted_href);
+//                list_nested_links.append(extracted_href);
 
                 // создание файла сохранения вложенной страницы
                 QFile file_nested_page;
-                file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.size() - 1) + FILE_EXTENSION);
+                file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.size()) + FILE_EXTENSION);
                 if(!file_nested_page.open(QIODevice::Append))
                 {
                     addLogMsg("Не удалось создать файл" + file_nested_page.fileName(), true);
@@ -165,9 +174,11 @@ void Backend::replyFinished(QNetworkReply *reply)
                 // создание запроса на загрузку вложенныой страницы
                 QNetworkRequest request(extracted_href);
                 QNetworkReply* reply_nested_link = manager->get(request);
+                list_nested_links.append(reply_nested_link);
+
                 model->addLink(new Link(QString("<a href=\"file:%2\">%1</a>").arg(reply_nested_link->url().toString()).arg(file_nested_page.fileName()), reply_nested_link));
-                connect(reply_nested_link, SIGNAL(downloadProgress(qint64,qint64)), SLOT(onDownloadProgressChanged(qint64,qint64)));
-                connect(reply_nested_link, SIGNAL(readyRead()), SLOT(onReadyRead()));
+                connect(reply_nested_link, SIGNAL(downloadProgress(qint64,qint64)), reply_parser, SLOT(onDownloadProgressChanged(qint64,qint64)));
+                connect(reply_nested_link, SIGNAL(readyRead()), reply_parser, SLOT(onReadyRead()));
             }
         }
         addLogMsg(QString("Найдено ссылок: %1").arg(list_nested_links.size()));
@@ -177,7 +188,12 @@ void Backend::replyFinished(QNetworkReply *reply)
     {
         // если вложенная ссылка
         QFile file_nested_page;
-        file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.indexOf(reply->url().toString())) + FILE_EXTENSION);
+        int file_name_index = list_nested_links.indexOf(reply);
+        if(file_name_index == -1)
+        {
+            return;
+        }
+        file_nested_page.setFileName(file_saving_location + "/" + QString::number(file_name_index) + FILE_EXTENSION);
         file_nested_page.close();
 
         model->setPercentage(reply, 100);

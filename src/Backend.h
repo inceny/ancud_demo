@@ -10,6 +10,9 @@
 #include <QFile>
 #include <QDir>
 #include <QCoreApplication>
+#include <QThread>
+
+#include "src/ReplyParser.h"
 
 #define FILE_EXTENSION ""
 
@@ -19,6 +22,12 @@ class Backend : public QObject
     Q_OBJECT
 public:
     explicit Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *parent = nullptr);
+    QUrl base_url;
+    QString file_saving_location;
+    QFile file_base_page;
+    QList<QNetworkReply*> list_nested_links;
+    QNetworkReply* reply_base_page;
+    LinkModel* model;
 
 signals:
     void errorMsgBox(QString error_str);
@@ -35,12 +44,8 @@ private:
     QNetworkAccessManager* manager;
     QQmlApplicationEngine* engine;
     QObject* text_area_log;
-    QUrl base_url;
-    QString file_saving_location;
-    QFile file_base_page;
-    QStringList list_nested_links;
-    QNetworkReply* reply_base_page;
-    LinkModel* model;
+    ReplyParser* reply_parser;
+    QThread* thread_reply_parser;
 };
 
 #endif // BACKEND_H
