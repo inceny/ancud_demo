@@ -1,8 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <src/Backend.h>
-#include <src/linkmodel.h>
+#include "src/Backend.h"
+#include "src/linkmodel.h"
 
 int main(int argc, char *argv[])
 {

@@ -36,6 +36,11 @@ void Backend::download(QString url)
 {
     clearSaveFolder();
     base_url = QUrl::fromEncoded(url.toLocal8Bit());
+    if(base_url.scheme() != "http" && base_url.scheme() != "https")
+    {
+        addLogMsg("Только http(s) протокол", true);
+        return;
+    }
     QNetworkRequest request(base_url);
 
     file_base_page.setFileName(file_saving_location + "/base_page.html");
@@ -70,7 +75,10 @@ void Backend::onReadyRead()
     {
         QFile file_nested_page;
         file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.indexOf(reply->url().toString())) + FILE_EXTENSION);
-        file_nested_page.open(QIODevice::Append);
+        if(!file_nested_page.isOpen())
+        {
+            file_nested_page.open(QIODevice::Append);
+        }
         file_nested_page.write(reply->readAll());
         file_nested_page.flush();
     }
@@ -84,7 +92,12 @@ void Backend::onDownloadProgressChanged(qint64 bytesReceived, qint64 bytesTotal)
         return;
     }
 
-    model->setPercentage(reply, (int)((float)bytesReceived*100/bytesTotal));
+    int value = (int)((float)bytesReceived*100/bytesTotal);
+    if(value >100 || value <0 )
+    {
+        return;
+    }
+    model->setPercentage(reply, value);
 //    qDebug() << bytesReceived  << bytesTotal << reply->url();
 }
 
@@ -122,7 +135,7 @@ void Backend::replyFinished(QNetworkReply *reply)
 
         // извлечение ссылок
         QRegularExpression re_a("(?i)<a([^>]+)>(.+?)</a>", QRegularExpression::DotMatchesEverythingOption);
-        QRegularExpression re_href("\\s*(?i)href\\s*=\\s*\"(([^\"]*)\"|'[^']*'|([^'\">\\s]+))");
+        QRegularExpression re_href("\\s*(?i)href\\s*=\\s*\"(([^\"]*)\"|'[^']*'|([^'\">\\s]+))", QRegularExpression::DotMatchesEverythingOption);
 
         QString extracted_href;
         QRegularExpressionMatchIterator i = re_a.globalMatch(page);
@@ -131,9 +144,12 @@ void Backend::replyFinished(QNetworkReply *reply)
             extracted_href = re_href.match(i.next().captured()).captured(1);
             extracted_href.chop(1);
 
-            if(!extracted_href.isEmpty() && QUrl::fromEncoded(extracted_href.toLocal8Bit()).isRelative())
+            if(!extracted_href.isEmpty())
             {
-                extracted_href = base_url.resolved(extracted_href).toString();
+                if(QUrl::fromEncoded(extracted_href.toLocal8Bit()).isRelative())
+                {
+                    extracted_href = base_url.resolved(extracted_href).toString();
+                }
                 list_nested_links.append(extracted_href);
 
                 // создание файла сохранения вложенной страницы
@@ -154,6 +170,8 @@ void Backend::replyFinished(QNetworkReply *reply)
                 connect(reply_nested_link, SIGNAL(readyRead()), SLOT(onReadyRead()));
             }
         }
+        addLogMsg(QString("Найдено ссылок: %1").arg(list_nested_links.size()));
+
     }
     else
     {
@@ -161,6 +179,8 @@ void Backend::replyFinished(QNetworkReply *reply)
         QFile file_nested_page;
         file_nested_page.setFileName(file_saving_location + "/" + QString::number(list_nested_links.indexOf(reply->url().toString())) + FILE_EXTENSION);
         file_nested_page.close();
+
+        model->setPercentage(reply, 100);
 
         // добавить сообщение в лог с ссылкой на загруженный файл
         addLogMsg(QString("Загружен файл: <a href=\"file:%2\">%1</a>").arg(reply->url().toString()).arg(file_nested_page.fileName()));
