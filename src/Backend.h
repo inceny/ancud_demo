@@ -14,38 +14,33 @@
 
 #include "src/ReplyParser.h"
 
-#define FILE_EXTENSION ""
-
 class LinkModel;
 class Backend : public QObject
 {
     Q_OBJECT
 public:
     explicit Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *parent = nullptr);
-    QUrl base_url;
-    QString file_saving_location;
-    QFile file_base_page;
-    QList<QNetworkReply*> list_nested_links;
-    QNetworkReply* reply_base_page;
+    ReplyParser* reply_parser;
     LinkModel* model;
+    QQmlApplicationEngine* engine;
+
+    QString file_saving_location;
+    QObject* text_area_log;
+    QThread* thread_reply_parser;
 
 signals:
     void errorMsgBox(QString error_str);
+    void startDownload(QString url);
+
 public slots:
     void download(QString url);
-    void replyFinished(QNetworkReply* reply);
     bool isDirWritable(QString dir);
     void addLogMsg(QString msg, bool error = false);
     void clearSaveFolder();
-    void onDownloadProgressChanged(qint64 bytesReceived, qint64 bytesTotal);
-    void onReadyRead();
+    void onAddLink(Link* link);
+    void onSetPercentage(QNetworkReply *reply, int percentage);
 
 private:
-    QNetworkAccessManager* manager;
-    QQmlApplicationEngine* engine;
-    QObject* text_area_log;
-    ReplyParser* reply_parser;
-    QThread* thread_reply_parser;
 };
 
 #endif // BACKEND_H
