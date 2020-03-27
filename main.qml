@@ -45,7 +45,7 @@ Window {
         objectName: "log"
         id: log
         height: 243
-        anchors.bottom: parent.bottom
+        anchors.bottom: textLinks.top
         anchors.bottomMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
@@ -92,4 +92,16 @@ Window {
         }
     }
 
+    Text {
+        id: textLinks
+        y: 430
+        text: "Вложенные ссылки: " + backend.finishedRepliesCount  + "/" + (listProgress.count - 1 >= 0 ? listProgress.count - 1 : 0)
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        font.pointSize: 12
+    }
 }

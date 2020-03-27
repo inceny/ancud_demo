@@ -29,7 +29,6 @@ public:
     void addLink(Link *link);
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-
     void setPercentage(QNetworkReply *reply, int percentage);
     void clearList();
 

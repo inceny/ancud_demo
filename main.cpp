@@ -11,12 +11,14 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     LinkModel model;
+    Backend backend;
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("myModel", &model);
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    Backend backend(&engine, &model);
     engine.rootContext()->setContextProperty("backend", &backend);
+
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    backend.init(&engine, &model);
     if (engine.rootObjects().isEmpty())
         return -1;
 

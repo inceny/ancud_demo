@@ -106,6 +106,7 @@ void ReplyParser::replyFinished(QNetworkReply *reply)
 
         QString extracted_href;
         QRegularExpressionMatchIterator i = re_a.globalMatch(page);
+        finshed_replies = 0;
         while (i.hasNext())
         {
             extracted_href = re_href.match(i.next().captured()).captured(1);
@@ -155,6 +156,7 @@ void ReplyParser::replyFinished(QNetworkReply *reply)
         file_nested_page.close();
 
         emit setPercentage(reply, 100);
+        emit finishedRepliesCountChanged(++finshed_replies);
 
         // добавить сообщение в лог с ссылкой на загруженный файл
         emit addLogMsg(QString("Загружен файл: <a href=\"file:%2\">%1</a>").arg(reply->url().toString()).arg(file_nested_page.fileName()), false);

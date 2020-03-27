@@ -26,6 +26,7 @@ signals:
     void addLogMsg(QString msg, bool error);
     void addLink(Link* link);
     void setPercentage(QNetworkReply *reply, int percentage);
+    void finishedRepliesCountChanged(int count);
 
 public slots:
     void onReadyRead();
@@ -35,7 +36,7 @@ public slots:
 private:
     Backend* backend;
     QNetworkAccessManager* manager;
-
+    int finshed_replies;
 };
 
 #endif // REPLYPARSER_H

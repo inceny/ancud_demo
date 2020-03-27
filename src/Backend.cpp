@@ -2,11 +2,17 @@
 #include <QDebug>
 #include <src/linkmodel.h>
 
-Backend::Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *parent) : QObject(parent)
+Backend::Backend(QObject *parent) : QObject(parent)
+{
+    reply_parser = 0;
+    finshed_replies = 0;
+}
+
+int Backend::init(QQmlApplicationEngine* engine, LinkModel* model)
 {
     this->engine = engine;
     this->model = model;
-
+    emit finishedRepliesCountChanged();
     text_area_log = engine->rootObjects().at(0)->findChild<QObject*>("log");
 
     reply_parser = new ReplyParser(this);
@@ -14,6 +20,7 @@ Backend::Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *paren
     connect(reply_parser, SIGNAL(addLogMsg(QString, bool)), this, SLOT(addLogMsg(QString, bool)));
     connect(reply_parser, SIGNAL(addLink(Link*)), this, SLOT(onAddLink(Link*)));
     connect(reply_parser, SIGNAL(setPercentage(QNetworkReply*, int)), this, SLOT(onSetPercentage(QNetworkReply*, int)));
+    connect(reply_parser, SIGNAL(finishedRepliesCountChanged(int)), this, SLOT(setFinishedRepliesCount(int)));
     thread_reply_parser = new QThread();
     reply_parser->moveToThread(thread_reply_parser);
     thread_reply_parser->start();
@@ -39,6 +46,11 @@ Backend::Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *paren
     clearSaveFolder();
 }
 
+int Backend::finishedRepliesCount()
+{
+    return finshed_replies;
+}
+
 void Backend::download(QString url)
 {
     clearSaveFolder();
@@ -53,6 +65,12 @@ void Backend::onAddLink(Link *link)
 void Backend::onSetPercentage(QNetworkReply *reply, int percentage)
 {
     model->setPercentage(reply, percentage);
+}
+
+void Backend::setFinishedRepliesCount(int count)
+{
+    finshed_replies = count;
+    emit finishedRepliesCountChanged();
 }
 
 void Backend::addLogMsg(QString msg, bool error)

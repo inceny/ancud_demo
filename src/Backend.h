@@ -18,8 +18,9 @@ class LinkModel;
 class Backend : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int finishedRepliesCount READ finishedRepliesCount WRITE setFinishedRepliesCount NOTIFY finishedRepliesCountChanged)
 public:
-    explicit Backend(QQmlApplicationEngine* engine, LinkModel* model, QObject *parent = nullptr);
+    explicit Backend(QObject *parent = nullptr);
     ReplyParser* reply_parser;
     LinkModel* model;
     QQmlApplicationEngine* engine;
@@ -28,9 +29,14 @@ public:
     QObject* text_area_log;
     QThread* thread_reply_parser;
 
+    int finshed_replies;
+    int finishedRepliesCount();
+
+    int init(QQmlApplicationEngine *engine, LinkModel *model);
 signals:
     void errorMsgBox(QString error_str);
     void startDownload(QString url);
+    void finishedRepliesCountChanged();
 
 public slots:
     void download(QString url);
@@ -39,7 +45,7 @@ public slots:
     void clearSaveFolder();
     void onAddLink(Link* link);
     void onSetPercentage(QNetworkReply *reply, int percentage);
-
+    void setFinishedRepliesCount(int count);
 private:
 };
 
